@@ -80,4 +80,20 @@ class TableGatewayTest extends TestCase
 
         assertThat($res, equalTo([1, 2, 3, 4]));
     }
+
+    /**
+     * @test
+     */
+    public function orderBy()
+    {
+        $t = $this->getTableGateway();
+
+        $res = $t
+            ->scope('aa = 1')
+            ->orderBy('id', 'ASC')
+            ->orderBy('id', 'DESC')
+            ->all()->asColumn('id')->toArray();
+
+        assertThat($res, equalTo([8, 7, 6, 5]));
+    }
 }

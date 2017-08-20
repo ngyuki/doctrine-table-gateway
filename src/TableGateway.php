@@ -135,6 +135,20 @@ class TableGateway
     }
 
     /**
+     * @param string      $sort
+     * @param string|null $order
+     *
+     * @return static
+     */
+    public function orderBy($sort, $order = null)
+    {
+        return $this->scope(function (QueryBuilder $q) use ($sort, $order) {
+            $q->orderBy($sort, $order);
+            return $q;
+        });
+    }
+
+    /**
      * @param mixed|array|null $id
      * @return mixed
      */
