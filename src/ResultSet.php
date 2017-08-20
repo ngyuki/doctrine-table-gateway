@@ -1,103 +1,49 @@
 <?php
 namespace ngyuki\TableGateway;
 
-use PDOStatement;
-use Doctrine\DBAL\Driver\ResultStatement;
-
-/**
- * テーブルゲートウェイの all() が返す結果セット
- *
- * 基本的には Statement オブジェクトをイテレーターにするためのラッパー
- */
-class ResultSet implements \Iterator
+class ResultSet extends ResultIterator
 {
     /**
-     * @var ResultStatement|PDOStatement
+     * @param string $column
+     *
+     * @return ResultIterator
      */
-    private $statement;
-
-    /**
-     * @var \Iterator
-     */
-    private $iterator;
-
-    /**
-     * @param ResultStatement|PDOStatement|\Traversable $statement
-     * @param array|\ArrayAccess|\ArrayObject|null $rowPrototype
-     */
-    public function __construct(\Traversable $statement, $rowPrototype = null)
+    public function asColumn($column)
     {
-        $this->statement = $statement;
-
-        if ($rowPrototype === null) {
-            $this->iterator = new \IteratorIterator($statement);
-            $this->iterator->rewind();
-        } else {
-            // @todo なぜか使用しているはずの変数で PhpStorm の警告がでる？
-            if (is_array($rowPrototype)) {
-                /** @noinspection PhpUnusedLocalVariableInspection */
-                $callback = function ($arr) use ($rowPrototype) {
-                    return array_replace($rowPrototype, $arr);
-                };
-            } elseif ($rowPrototype instanceof \ArrayObject) {
-                /** @noinspection PhpUnusedLocalVariableInspection */
-                $callback = function ($arr) use ($rowPrototype) {
-                    $row = clone $rowPrototype;
-                    $row->exchangeArray($arr);
-                    return $row;
-                };
-            } elseif ($rowPrototype instanceof \ArrayAccess) {
-                /** @noinspection PhpUnusedLocalVariableInspection */
-                $callback = function ($arr) use ($rowPrototype) {
-                    $row = clone $rowPrototype;
-                    foreach ($arr as $name => $val) {
-                        $row[$name] = $val;
-                    }
-                    return $row;
-                };
-            } else {
-                throw new \InvalidArgumentException("invalid row prototype");
+        return new ResultIterator((function () use ($column) {
+            foreach ($this as $key => $arr) {
+                yield $key => $arr[$column];
             }
-
-            $this->iterator = (function () use ($callback) {
-                foreach ($this->statement as $key => $arr) {
-                    $row = $callback($arr);
-                    yield $key => $row;
-                }
-            })();
-        }
+        })());
     }
 
     /**
-     * @return mixed
+     * @param string $column
+     *
+     * @return static
      */
-    public function current()
+    public function asUnique($column)
     {
-        return $this->iterator->current();
+        return new static((function () use ($column) {
+            $prev = null;
+            foreach ($this as $arr) {
+                $key = $arr[$column];
+                if ($prev !== $key) {
+                    $prev = $key;
+                    yield $key => $arr;
+                }
+            }
+        })());
     }
 
-    public function next()
+    /**
+     * @param string $key
+     * @param string $val
+     *
+     * @return ResultIterator
+     */
+    public function asPair($key, $val)
     {
-        $this->iterator->next();
-    }
-
-    public function key()
-    {
-        return $this->iterator->key();
-    }
-
-    public function valid()
-    {
-        return $this->iterator->valid();
-    }
-
-    public function rewind()
-    {
-        $this->iterator->rewind();
-    }
-
-    public function toArray()
-    {
-        return iterator_to_array($this);
+        return $this->asUnique($key)->asColumn($val);
     }
 }
