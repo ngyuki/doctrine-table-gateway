@@ -148,29 +148,32 @@ class TableGateway
         });
     }
 
+    private function scopeById($id)
+    {
+        if ($id === null) {
+            return $this;
+        }
+
+        $ids = (array)$id;
+
+        $keys = $this->metadata->getPrimaryKey($this->table);
+
+        if (count($ids) !== count($keys)) {
+            throw new \InvalidArgumentException();
+        }
+
+        $vars = array_combine($keys, $ids);
+
+        return $this->scope($vars);
+    }
+
     /**
      * @param mixed|array|null $id
      * @return mixed
      */
     public function find($id = null)
     {
-        $t = $this;
-
-        if ($id !== null) {
-            $ids = (array)$id;
-
-            $keys = $this->metadata->getPrimaryKey($this->table);
-
-            if (count($ids) !== count($keys)) {
-                throw new \InvalidArgumentException();
-            }
-
-            $vars = array_combine($keys, $ids);
-
-            return $this->scope($vars)->find();
-        }
-
-        foreach ($t->all() as $row) {
+        foreach ($this->scopeById($id)->all() as $row) {
             return $row;
         }
 
@@ -194,5 +197,57 @@ class TableGateway
         $query = $this->buildQuery()->select('*')->from($this->table);
         $stmt = $query->execute();
         return $this->createResultSet($stmt);
+    }
+
+    public function lastInsertId()
+    {
+        return $this->conn->lastInsertId();
+    }
+
+    private function quotes(array $data)
+    {
+        $columns = $this->metadata->getColumns($this->table);
+        $data = array_intersect_key($data, array_flip($columns));
+        $ret = [];
+        foreach ($data as $key => $val) {
+            $ret[$this->conn->quoteIdentifier($key)] = $this->conn->quote($val);
+        }
+        return $ret;
+    }
+
+    public function insert(array $data)
+    {
+        $data = $data + $this->values;
+
+        $query = $this->buildQuery()->insert($this->table);
+        $query->values($this->quotes($data));
+        $query->execute();
+    }
+
+    public function update($id = null, array $data)
+    {
+        if ($id !== null) {
+            $this->scopeById($id)->update(null, $data);
+            return;
+        }
+
+        $query = $this->buildQuery()->update($this->table);
+
+        foreach ($this->quotes($data) as $key => $val) {
+            $query->set($key, $val);
+        }
+
+        $query->execute();
+    }
+
+    public function delete($id = null)
+    {
+        if ($id !== null) {
+            $this->scopeById($id)->delete();
+            return;
+        }
+
+        $query = $this->buildQuery()->delete($this->table);
+        $query->execute();
     }
 }
