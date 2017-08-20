@@ -1,0 +1,23 @@
+<?php
+return (function() {
+
+    $config = [
+        'driver' => 'pdo_mysql',
+    ];
+
+    $envs = [
+        'host'     => 'MYSQL_HOST',
+        'dbname'   => 'MYSQL_DATABASE',
+        'user'     => 'MYSQL_USER',
+        'password' => 'MYSQL_PASSWORD',
+    ];
+
+    foreach ($envs as $key => $env) {
+        $val = getenv($env);
+        if ($val !== false) {
+            $config[$key] = $val;
+        }
+    }
+
+    return $config;
+})();

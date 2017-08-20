@@ -1,0 +1,13 @@
+{
+    "require": {
+        "doctrine/dbal": "^2.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "ngyuki\\TableGateway\\": "src/"
+        }
+    },
+    "require-dev": {
+        "ngyuki/phpunit-functions": "^1.0"
+    }
+}
