@@ -4,7 +4,6 @@ namespace ngyuki\DoctrineTableGateway;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\ResultStatement;
 use Doctrine\DBAL\Query\QueryBuilder;
-use OutOfBoundsException;
 
 class TableGateway
 {
@@ -198,7 +197,7 @@ class TableGateway
 
     /**
      * @param mixed|array|null $id
-     * @return mixed
+     * @return mixed|null
      */
     public function find($id = null)
     {
@@ -206,7 +205,7 @@ class TableGateway
             return $row;
         }
 
-        throw new OutOfBoundsException("data not found");
+        return null;
     }
 
     /**

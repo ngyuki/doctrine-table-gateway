@@ -23,22 +23,14 @@ class TableGatewayTest extends TestCase
         $res = $t->find(5);
         assertThat($res['id'], equalTo(5));
 
-        try {
-            $t->find(9999);
-            $this->fail();
-        } catch (\OutOfBoundsException $ex) {
-            assertTrue(true);
-        }
+        $res = $t->find(9999);
+        assertThat($res, isNull());
 
         $res = $t->scope('aa = 1')->scope('bb = 0')->find(6);
         assertThat($res['id'], equalTo(6));
 
-        try {
-            $t->scope('aa = 1')->scope('bb = 9999')->find(6);
-            $this->fail();
-        } catch (\OutOfBoundsException $ex) {
-            assertTrue(true);
-        }
+        $res = $t->scope('aa = 1')->scope('bb = 9999')->find(6);
+        assertThat($res, isNull());
     }
 
     public function scope()
