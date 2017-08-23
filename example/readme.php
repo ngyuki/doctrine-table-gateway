@@ -117,23 +117,23 @@ $t->scope('a = 1', ['b' => 2])->insert(['c' => 3]);
 
 ////////////////////////////////////////////////////////////////////////////////
 
-$t->update(1, ['a' => 1, 'b' => 2, 'c' => 3]);
-#=> UPDATE ... SET a = 1, b = 2, c = 3 WHERE id = 1
-
-$t->delete(1);
-#=> DELETE FROM ... WHERE id = 1
-
-$t->update(1, ['a' => 1, 'xxx' => 2]);
-#=> UPDATE ... SET a = 1 WHERE id = 1
-
-$t->scope('a = 1')->update(null, ['b' => 2, 'c' => 3]);
+$t->scope('a = 1')->update(['b' => 2, 'c' => 3]);
 #=> UPDATE ... SET b = 2, c = 3 WHERE a = 1
+
+$t->scope('a = 1')->update(['b' => 2, 'xxx' => 9]);
+#=> UPDATE ... SET b = 2 WHERE a = 1
 
 $t->scope('a = 1')->delete();
 #=> DELETE FROM ... WHERE a = 1
 
-$t->update(null, ['b' => 2, 'c' => 3]);
-#=> UPDATE ... SET b = 2, c = 3
+$t->by(1)->update(['a' => 1, 'b' => 2, 'c' => 3]);
+#=> UPDATE ... SET a = 1, b = 2, c = 3 WHERE id = 1
+
+$t->by(1)->delete();
+#=> DELETE FROM ... WHERE id = 1
+
+$t->update(['a' => 1, 'b' => 2, 'c' => 3]);
+#=> UPDATE ... SET a = 1, b = 2, c = 3
 
 $t->delete();
 #=> DELETE FROM ...

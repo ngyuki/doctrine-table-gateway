@@ -154,42 +154,42 @@ $t->scope('a = 1', ['b' => 2])->insert(['c' => 3]);
 
 ## UPDATE/DELETE
 
-`update($id, $data)` で主キーを指定して UPDATE できます。
+`update($data)` で指定したデータで、スコープのすべての行を UPDATE します。
 
 ```php
-$t->update(1, ['a' => 1, 'b' => 2, 'c' => 3]);
-#=> UPDATE ... SET a = 1, b = 2, c = 3 WHERE id = 1
-```
-
-`delete($id)` も同じように主キーを指定して DELETE します。
-
-```php
-$t->delete(1);
-#=> DELETE FROM ... WHERE id = 1
-```
-
-UPDATE で存在しない列名を指定しても無視されます。
-
-```php
-$t->update(1, ['a' => 1, 'xxx' => 2]);
-#=> UPDATE ... SET a = 1 WHERE id = 1
-```
-
-`$id` を NULL または未指定にすると、スコープの範囲すべてが UPDATE や DELETE の対象になります。
-
-```php
-$t->scope('a = 1')->update(null, ['b' => 2, 'c' => 3]);
+$t->scope('a = 1')->update(['b' => 2, 'c' => 3]);
 #=> UPDATE ... SET b = 2, c = 3 WHERE a = 1
+```
 
+`update($data)` で存在しない列を指定しても無視されます。
+
+```php
+$t->scope('a = 1')->update(['b' => 2, 'xxx' => 9]);
+#=> UPDATE ... SET b = 2 WHERE a = 1
+```
+
+`update($data)` でスコープのすべての行を DELETE します。
+
+```php
 $t->scope('a = 1')->delete();
 #=> DELETE FROM ... WHERE a = 1
 ```
 
-スコープが適用されていなければすべての行が対象になります。
+主キーを指定したいときは `by($id)` でスコープを適用してください。
 
 ```php
-$t->update(null, ['b' => 2, 'c' => 3]);
-#=> UPDATE ... SET b = 2, c = 3
+$t->by(1)->update(['a' => 1, 'b' => 2, 'c' => 3]);
+#=> UPDATE ... SET a = 1, b = 2, c = 3 WHERE id = 1
+
+$t->by(1)->delete();
+#=> DELETE FROM ... WHERE id = 1
+```
+
+スコープが適用されていないときはすべての行が対象になります。
+
+```php
+$t->update(['a' => 1, 'b' => 2, 'c' => 3]);
+#=> UPDATE ... SET a = 1, b = 2, c = 3
 
 $t->delete();
 #=> DELETE FROM ...
