@@ -33,6 +33,11 @@ class TableGateway
      */
     private $scope;
 
+    /**
+     * @var array
+     */
+    private $values = [];
+
     public function __construct(Connection $conn, $table, Metadata $metadata = null)
     {
         $this->conn = $conn;
@@ -91,12 +96,23 @@ class TableGateway
     }
 
     /**
-     * @param mixed $scope
+     * @param mixed      $scope
+     * @param array|null $values
      *
      * @return $this
      */
-    protected function setScope($scope)
+    protected function setScope($scope, array $values = null)
     {
+        if ($values === null) {
+            if (is_array($scope)) {
+                foreach ($scope as $key => $val) {
+                    if (is_string($key)) {
+                        $values[$key] = $val;
+                    }
+                }
+            }
+        }
+
         if ($scope instanceof \Closure === false) {
             $list = (array)$scope;
             $scope = function (QueryBuilder $q) use ($list) {
@@ -118,26 +134,32 @@ class TableGateway
         }
 
         $this->scope = $scope;
+
+        if ($values) {
+            $this->values = $values + $this->values;
+        }
         return $this;
     }
 
     /**
-     * @param mixed $scope
+     * @param mixed      $scope
+     * @param array|null $values
      *
      * @return static
      */
-    public function scope($scope)
+    public function scope($scope, array $values = null)
     {
         if ($scope === null) {
             $obj = clone $this;
             $obj->delegate = null;
             $obj->scope = null;
+            $obj->values = [];
             return $obj;
         }
 
         $obj = clone $this;
         $obj->delegate = $this;
-        $obj->setScope($scope);
+        $obj->setScope($scope, $values);
         return $obj;
     }
 
@@ -213,6 +235,8 @@ class TableGateway
 
     private function quotes(array $data)
     {
+        $data = $data + $this->values;
+
         $columns = $this->metadata->getColumns($this->table);
         $data = array_intersect_key($data, array_flip($columns));
         $ret = [];

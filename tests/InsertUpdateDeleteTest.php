@@ -54,6 +54,18 @@ class InsertUpdateDeleteTest extends TestCase
     /**
      * @test
      */
+    public function insert_scope()
+    {
+        $t = $this->getTableGateway()->scope(['aa' => 888]);
+
+        $t->insert(['id' => 9999]);
+
+        assertThat($t->find(9999)['aa'], equalTo(888));
+    }
+
+    /**
+     * @test
+     */
     public function update()
     {
         $t = $this->getTableGateway();
