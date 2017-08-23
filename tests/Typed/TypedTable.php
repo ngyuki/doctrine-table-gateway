@@ -14,11 +14,11 @@ class TypedTable extends TableGateway
     }
 
     /**
-     * @param mixed|array|null $id
+     * @param mixed|array $id
      *
-     * @return TypedRow
+     * @return TypedRow|null
      */
-    public function find($id = null)
+    public function find($id)
     {
         return parent::find($id);
     }

@@ -31,12 +31,6 @@ dump($res);
 
 ///
 
-h("find()");
-$res = $t->find();
-dump($res);
-
-///
-
 h("find(6)");
 $res = $t->find(6);
 dump($res);

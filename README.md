@@ -19,10 +19,6 @@ $t = new TableGateway($connection, 'example');
 // find($id) で主キーで 1 件の行を array で返す
 $t->find(1);
 
-// find() で引数を省略するとテーブルの先頭行が返る
-// 後述の orderBy() で並び順を指定しなければ結果は不定かも知れない
-$t->find();
-
 // find() は行が見つからない場合は null を返す
 $t->find(9999);
 

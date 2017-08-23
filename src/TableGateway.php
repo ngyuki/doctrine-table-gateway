@@ -216,19 +216,12 @@ class TableGateway
     }
 
     /**
-     * @param mixed|array|null $id
+     * @param mixed|array $id
      * @return mixed|null
      */
-    public function find($id = null)
+    public function find($id)
     {
-        if ($id !== null) {
-            return $this->by($id)->find();
-        }
-        foreach ($this->all() as $row) {
-            return $row;
-        }
-
-        return null;
+        return $this->by($id)->all()->current() ?: null;
     }
 
     /**
