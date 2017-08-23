@@ -1,7 +1,7 @@
 <?php
-namespace ngyuki\TableGateway\Test\Typed;
+namespace ngyuki\DoctrineTableGateway\Test\Typed;
 
-use ngyuki\TableGateway\ResultSet;
+use ngyuki\DoctrineTableGateway\ResultSet;
 
 class TypedSet extends ResultSet
 {

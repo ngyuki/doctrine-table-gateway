@@ -1,9 +1,9 @@
 <?php
-namespace ngyuki\TableGateway\Test;
+namespace ngyuki\DoctrineTableGateway\Test;
 
 use Cache\Adapter\Doctrine\DoctrineCachePool;
 use Doctrine\Common\Cache\ArrayCache;
-use ngyuki\TableGateway\Metadata;
+use ngyuki\DoctrineTableGateway\Metadata;
 use PHPUnit\Framework\TestCase;
 
 class MetadataTest extends TestCase

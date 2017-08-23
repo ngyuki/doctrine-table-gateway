@@ -1,5 +1,5 @@
 <?php
-namespace ngyuki\TableGateway;
+namespace ngyuki\DoctrineTableGateway;
 
 use Doctrine\DBAL\Connection;
 use Psr\SimpleCache\CacheInterface;

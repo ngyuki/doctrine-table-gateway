@@ -1,5 +1,5 @@
 <?php
-namespace ngyuki\TableGateway\Test;
+namespace ngyuki\DoctrineTableGateway\Test;
 
 use Doctrine\DBAL\DriverManager;
 

@@ -1,9 +1,9 @@
 <?php
-namespace ngyuki\TableGateway\Test\Typed;
+namespace ngyuki\DoctrineTableGateway\Test\Typed;
 
 use Doctrine\DBAL\Connection;
-use ngyuki\TableGateway\ResultSet;
-use ngyuki\TableGateway\TableGateway;
+use ngyuki\DoctrineTableGateway\ResultSet;
+use ngyuki\DoctrineTableGateway\TableGateway;
 
 class TypedTable extends TableGateway
 {

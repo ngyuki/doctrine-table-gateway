@@ -1,5 +1,5 @@
 <?php
-namespace ngyuki\TableGateway\Test\Typed;
+namespace ngyuki\DoctrineTableGateway\Test\Typed;
 
 use ArrayObject;
 

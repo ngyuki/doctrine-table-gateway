@@ -5,7 +5,7 @@
     },
     "autoload": {
         "psr-4": {
-            "ngyuki\\TableGateway\\": "src/"
+            "ngyuki\\DoctrineTableGateway\\": "src/"
         }
     },
     "require-dev": {

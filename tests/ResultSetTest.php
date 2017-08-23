@@ -1,8 +1,8 @@
 <?php
-namespace ngyuki\TableGateway\Test;
+namespace ngyuki\DoctrineTableGateway\Test;
 
 use Doctrine\DBAL\Query\QueryBuilder;
-use ngyuki\TableGateway\TableGateway;
+use ngyuki\DoctrineTableGateway\TableGateway;
 use PHPUnit\Framework\TestCase;
 
 class ResultSetTest extends TestCase

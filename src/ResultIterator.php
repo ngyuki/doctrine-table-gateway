@@ -1,5 +1,5 @@
 <?php
-namespace ngyuki\TableGateway;
+namespace ngyuki\DoctrineTableGateway;
 
 use IteratorIterator;
 use Traversable;

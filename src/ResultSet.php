@@ -1,5 +1,5 @@
 <?php
-namespace ngyuki\TableGateway;
+namespace ngyuki\DoctrineTableGateway;
 
 class ResultSet extends ResultIterator
 {

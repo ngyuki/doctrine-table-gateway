@@ -1,7 +1,7 @@
 <?php
-namespace ngyuki\TableGateway\Test\Typed;
+namespace ngyuki\DoctrineTableGateway\Test\Typed;
 
-use ngyuki\TableGateway\Test\ConnectionManager;
+use ngyuki\DoctrineTableGateway\Test\ConnectionManager;
 use PHPUnit\Framework\TestCase;
 
 class TypedTest extends TestCase
