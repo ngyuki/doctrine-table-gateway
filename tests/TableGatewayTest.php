@@ -96,4 +96,21 @@ class TableGatewayTest extends TestCase
 
         assertThat($res, equalTo([8, 7, 6, 5]));
     }
+
+    /**
+     * @test
+     */
+    function scope_null()
+    {
+        $t = $this->getTableGateway();
+
+        $res = $t->scope('aa = 1')->all()->toArray();
+        assertCount(4, $res);
+
+        $res = $t->scope('aa = 1')->scope('bb = 1')->all()->toArray();
+        assertCount(2, $res);
+
+        $res = $t->scope('aa = 1')->scope('bb = 1')->scope(null)->all()->toArray();
+        assertCount(8, $res);
+    }
 }

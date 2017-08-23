@@ -128,6 +128,13 @@ class TableGateway
      */
     public function scope($scope)
     {
+        if ($scope === null) {
+            $obj = clone $this;
+            $obj->delegate = null;
+            $obj->scope = null;
+            return $obj;
+        }
+
         $obj = clone $this;
         $obj->delegate = $this;
         $obj->setScope($scope);
