@@ -176,18 +176,24 @@ class TableGateway
         });
     }
 
-    private function scopeById($id)
+    /**
+     * 主キーでスコープを適用する
+     *
+     * @param mixed $id プライマリキーの値、複合主キーなら配列で指定する
+     *
+     * @return static
+     */
+    public function by($id)
     {
-        if ($id === null) {
-            return $this;
-        }
-
         $ids = (array)$id;
 
         $keys = $this->metadata->getPrimaryKey($this->table);
 
         if (count($ids) !== count($keys)) {
-            throw new \InvalidArgumentException();
+            throw new \InvalidArgumentException(
+                sprintf("invalid id count ... %s primary key(%s), but actual %s keys",
+                    $this->table, implode(', ', $keys), count($ids))
+            );
         }
 
         $vars = array_combine($keys, $ids);
@@ -201,7 +207,10 @@ class TableGateway
      */
     public function find($id = null)
     {
-        foreach ($this->scopeById($id)->all() as $row) {
+        if ($id !== null) {
+            return $this->by($id)->find();
+        }
+        foreach ($this->all() as $row) {
             return $row;
         }
 
@@ -254,13 +263,8 @@ class TableGateway
         $query->execute();
     }
 
-    public function update($id = null, array $data)
+    public function update(array $data)
     {
-        if ($id !== null) {
-            $this->scopeById($id)->update(null, $data);
-            return;
-        }
-
         $query = $this->buildQuery()->update($this->table);
 
         foreach ($this->quotes($data) as $key => $val) {
@@ -270,13 +274,8 @@ class TableGateway
         $query->execute();
     }
 
-    public function delete($id = null)
+    public function delete()
     {
-        if ($id !== null) {
-            $this->scopeById($id)->delete();
-            return;
-        }
-
         $query = $this->buildQuery()->delete($this->table);
         $query->execute();
     }

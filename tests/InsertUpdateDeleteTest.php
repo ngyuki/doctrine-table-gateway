@@ -70,7 +70,7 @@ class InsertUpdateDeleteTest extends TestCase
     {
         $t = $this->getTableGateway();
 
-        $t->update(1, ['name' => 'xxx']);
+        $t->by(1)->update(['name' => 'xxx']);
 
         assertThat($t->find(1)['name'], equalTo('xxx'));
     }
@@ -82,7 +82,7 @@ class InsertUpdateDeleteTest extends TestCase
     {
         $t = $this->getTableGateway();
 
-        $t->scope('aa = 1')->update(null, ['name' => 'xxx']);
+        $t->scope('aa = 1')->update(['name' => 'xxx']);
 
         $res = $t->all()->asColumn('name')->toArray();
         assertThat($res, equalTo([
@@ -104,7 +104,7 @@ class InsertUpdateDeleteTest extends TestCase
     {
         $t = $this->getTableGateway();
 
-        $t->delete(3);
+        $t->by(3)->delete();
 
         $res = $t->all()->asColumn('id')->toArray();
         assertThat($res, equalTo([1, 2, 4, 5, 6, 7, 8]));
@@ -117,7 +117,7 @@ class InsertUpdateDeleteTest extends TestCase
     {
         $t = $this->getTableGateway();
 
-        $t->scope('aa = 1')->delete(null);
+        $t->scope('aa = 1')->delete();
 
         $res = $t->all()->asColumn('id')->toArray();
         assertThat($res, equalTo([1, 2, 3, 4]));
