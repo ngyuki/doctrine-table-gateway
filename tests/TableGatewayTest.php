@@ -92,6 +92,18 @@ class TableGatewayTest extends TestCase
     /**
      * @test
      */
+    public function select()
+    {
+        $t = $this->getTableGateway();
+
+        $res = $t->select(['id', 'name'])->find(1);
+
+        assertThat(array_keys($res), equalTo(['id', 'name']));
+    }
+
+    /**
+     * @test
+     */
     function scope_null()
     {
         $t = $this->getTableGateway();

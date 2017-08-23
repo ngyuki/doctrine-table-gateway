@@ -55,9 +55,10 @@ class TableGateway
     }
 
     /**
+     * @param QueryBuilder|null $q
      * @return QueryBuilder
      */
-    private function buildQuery()
+    private function buildQuery(QueryBuilder $q = null)
     {
         /* @var $list TableGateway[] */
         $list = [];
@@ -70,7 +71,7 @@ class TableGateway
 
         $list = array_reverse($list);
 
-        $q = $this->conn->createQueryBuilder();
+        $q = $q ?? $this->conn->createQueryBuilder();
 
         foreach ($list as $t) {
             $old = $q->getQueryPart('where');
@@ -163,6 +164,19 @@ class TableGateway
     }
 
     /**
+     * @param string|array $select
+     *
+     * @return static
+     */
+    public function select($select)
+    {
+        return $this->scope(function (QueryBuilder $q) use ($select) {
+            $q->select($select);
+            return $q;
+        });
+    }
+
+    /**
      * @param string      $sort
      * @param string|null $order
      *
@@ -231,7 +245,8 @@ class TableGateway
      */
     public function all()
     {
-        $query = $this->buildQuery()->select('*')->from($this->table);
+        $query = $this->conn->createQueryBuilder()->select('*');
+        $query = $this->buildQuery($query)->from($this->table);
         $stmt = $query->execute();
         return $this->createResultSet($stmt);
     }
