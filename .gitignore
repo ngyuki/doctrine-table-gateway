@@ -1,3 +1,4 @@
 /vendor/
 /phpunit.xml
 /tests/config.php
+/build/

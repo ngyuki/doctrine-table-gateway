@@ -1,6 +1,9 @@
 <?php
 namespace ngyuki\DoctrineTableGateway\Example;
 
+use Cache\Adapter\Doctrine\DoctrineCachePool;
+use Doctrine\Common\Cache\FilesystemCache;
+use ngyuki\DoctrineTableGateway\Metadata;
 use ngyuki\DoctrineTableGateway\TableGateway;
 use ngyuki\DoctrineTableGateway\Test\ConnectionManager;
 
@@ -9,7 +12,10 @@ require __DIR__ . '/bootstrap.php';
 $conn = ConnectionManager::getConnection();
 $conn->beginTransaction();
 
-$t = (new TableGateway($conn, 't_user'))->scope('aa = 1');
+$cache = new DoctrineCachePool(new FilesystemCache(__DIR__ . '/../build/'));
+$meta = new Metadata($conn, $cache);
+
+$t = (new TableGateway($conn, 't_user', $meta))->scope('aa = 1');
 
 ///
 
