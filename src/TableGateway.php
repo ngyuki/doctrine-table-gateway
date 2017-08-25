@@ -121,7 +121,7 @@ class TableGateway
                         $q->andWhere(
                             $q->expr()->eq(
                                 $this->conn->quoteIdentifier($key),
-                                $this->conn->quote($scope)
+                                $this->quoteValue($scope)
                             )
                         );
                     } elseif (is_string($scope)) {
@@ -254,6 +254,9 @@ class TableGateway
         if ($val === null) {
             return 'NULL';
         }
+        if (is_object($val) && $val instanceof Expr) {
+            return $val;
+        }
         if (is_bool($val)) {
             return var_export($val, true);
         }
@@ -277,6 +280,11 @@ class TableGateway
             $ret[$this->conn->quoteIdentifier($key)] = $this->quoteValue($val);
         }
         return $ret;
+    }
+
+    public function expr($expr)
+    {
+        return new Expr($expr);
     }
 
     public function insert(array $data)
