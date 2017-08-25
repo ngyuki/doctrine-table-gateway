@@ -66,6 +66,19 @@ class InsertUpdateDeleteTest extends TestCase
     /**
      * @test
      */
+    public function insert_null()
+    {
+        $t = $this->getTableGateway();
+
+        $t->insert(['id' => 9999, 'aa' => null]);
+        assertThat($t->lastInsertId(), equalTo(9999));
+
+        assertThat($t->find(9999), logicalNot(isEmpty()));
+    }
+
+    /**
+     * @test
+     */
     public function update()
     {
         $t = $this->getTableGateway();

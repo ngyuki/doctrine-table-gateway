@@ -249,6 +249,23 @@ class TableGateway
         return $this->conn->lastInsertId();
     }
 
+    private function quoteValue($val)
+    {
+        if ($val === null) {
+            return 'NULL';
+        }
+        if (is_bool($val)) {
+            return var_export($val, true);
+        }
+        if (is_float($val)) {
+            return $val;
+        }
+        if (is_int($val)) {
+            return $val;
+        }
+        return $this->conn->quote($val);
+    }
+
     private function quotes(array $data)
     {
         $data = $data + $this->values;
@@ -257,7 +274,7 @@ class TableGateway
         $data = array_intersect_key($data, array_flip($columns));
         $ret = [];
         foreach ($data as $key => $val) {
-            $ret[$this->conn->quoteIdentifier($key)] = $this->conn->quote($val);
+            $ret[$this->conn->quoteIdentifier($key)] = $this->quoteValue($val);
         }
         return $ret;
     }
