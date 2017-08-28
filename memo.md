@@ -7,44 +7,6 @@
 ArrayObject で試したところ プロトタイプパターン の方が早い。
 構築について複雑な処理が不要ならプロトタイプパターンのほうが良さそう。
 
-## スコープ
-
-検索条件はすべてスコープで表現すると良いかも
-
-```php
-$userTable->scope(['name' => 'ore'])->delete();
-$userTable->scope(['email' => 'ore@example.com'])->update(['name' => 'are'])
-$userTable->scopeActive()->all();
-$userTable->scopeAll()->find(1);
-
-class UserTable
-{
-    function __construct()
-    {
-        $this->addScope(
-            // select とかの条件
-            'disable_flg = 1',
-            // insert のデフォルト値
-            ['disable_flg' => 0]
-        );
-    }
-
-    function scopeAdmin()
-    {
-        return $this->scope(
-            'admin_flg = 1',
-            // insert のデフォルト値
-            ['admin_flg' => 0]
-        );
-    }
-
-    function scopeAll()
-    {
-        return $this->resetScopez();
-    }
-}
-```
-
 ## 名前と順序のパラメータ
 
 eq とかでパラメータを指定するとき、ユーザーコードでどっちが使われているかわからないと名前にするか順序にするか判断できない。
@@ -56,15 +18,6 @@ eq とかでパラメータを指定するとき、ユーザーコードでど�
 doctrine-dbal はライブラリ側でその手のバインドは行われず、アプリでバインドするかクオートするかぐらい。
 
 ZF はクオートして埋め込まれる？ コードを見た感じ名前付きになることもある？ 順序になることはない？
-
-## insert のデフォルト
-
-scope で単純な連想配列を指定したときは insert のデフォルト値としても使えることにする。
-クロージャーとかで自動判定できないときは scope の第２引数で指定するとか。
-
-```php
-$t->scope(function ($q) { $q->where('disable = 1'); }, ['disabled' => 1]);
-```
 
 ## into とか
 
@@ -88,24 +41,74 @@ $t->alias('A')->hasMany('tags', 't_tag', 'T', ['T.tag_id' => 'A.tag_id']);
 $t->alias('A')->hasOne('tag', 't_tag', 'T', ['T.tag_id' => 'A.tag_id']);
 ```
 
+join とか必要なら SQL を直で書けば良い気がする。
 
+## query
 
+SQL を直で書きたいときに使うメソッド。
 
+スコープとして扱うか ResultSet を返すか。
 
+```php
+// スコープ
+$t->query($sql)->all()->current();
 
+// ResultSet を返す
+$t->query($sql)->current();
+```
 
+スコープとして扱ってもその次にできることは `all()` しか無いので直接 ResultSet を返すことにする。
 
+## all の戻り値
 
+all がイテレーターを返すようにしたのは、型付きで実装するときにメソッドの型宣言でイテレータークラスを指定できるようにするため。
 
+がしかし、Phan とかで静的解析する前提なら `@return Uset[]` とかで良い気もする。。。
 
+あと、イテレーターでメソッドチェインすることとか考えたけど。。
 
+```php
+// id => name のペアを返す
+$t->all()->asUnique('id')->asColumn('name');
+```
 
+TableGateway に fetchXXX なメソッドが生えているだけで十分な気もする。
 
+```php
+$t->fetch();
+$t->fetchAll();
+$t->fetchUnique($key);
+$t->fetchPair($key, $val);
+$t->fetchOne($cols);
+$t->fetchColumn($cols);
+```
 
+イテレーターでの実装のほうが数は少なくてすむ。
 
+```php
+$t->all()->current();
+$t->all()->toArray();
+$t->all()->asUnique($key)->toArray();
+$t->all()->asUnique($key)->asColumns($val)->toArray();
+$t->all()->asColumns($val)->current();
+$t->all()->asColumns($val)->toArray();
+```
 
+イテレーターを返す前提にすると、型付きにするときに UserResultSet みたいなものまで実装する必要があって煩雑。
 
+...
 
+テーブルゲートウェイにスコープの概念を導入したわけなので TableGateway=ResultSet みたいな感じにしても良いかも？
 
+つまり TableGateway をイテレーターにして rewind でクエリを実行する。
 
+- IteratorAggregate を実装する
+- getIterator でクローンした TableGateway を返す
+- TableGateway 自身が ResultSet を保持する
 
+IteratorAggregate は Iterator を返さなければならないので↑の実装は不可能。
+やるなら TableGateway は Iterator でなければならない。
+
+Iterator を実装するようにすると同じ TableGateway のインスタンスを foreach で入れ子するとおかしなことになる。。。
+Iterator は状態を持つわけなのでそれを TableGateway が実装することには違和感がある。
+やっぱり ResultSet を実装する必要あるか。。。
