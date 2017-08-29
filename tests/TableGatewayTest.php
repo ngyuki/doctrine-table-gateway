@@ -117,4 +117,39 @@ class TableGatewayTest extends TestCase
         $res = $t->scope('aa = 1')->scope('bb = 1')->scope(null)->all()->toArray();
         assertCount(8, $res);
     }
+
+    /**
+     * @test
+     */
+    function query()
+    {
+        $t = $this->getTableGateway();
+        $name = $t->query('select name from t_user where id = 4')->asColumn('name')->current();
+        assertEquals('id4', $name);
+    }
+
+    /**
+     * @test
+     */
+    function t()
+    {
+        $t = $this->getTableGateway();
+
+        $ret = $t->transactional(function () {
+            return 123;
+        });
+        assertEquals(123, $ret);
+
+
+        try {
+            $t->transactional(
+                function () {
+                    throw new \RuntimeException("!!!");
+                }
+            );
+            $this->fail();
+        } catch (\RuntimeException $ex) {
+            assertEquals("!!!", $ex->getMessage());
+        }
+    }
 }

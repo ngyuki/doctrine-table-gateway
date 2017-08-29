@@ -244,6 +244,57 @@ class TableGateway
         return $this->createResultSet($stmt);
     }
 
+    /**
+     * SQL を直接実行する
+     *
+     * スコープは適用されず、指定した通りの SQL がそのまま実行されます
+     *
+     * @param string $sql
+     * @param array $params
+     *
+     * @return ResultSet
+     */
+    public function query($sql, array $params = [])
+    {
+        $stmt = $this->getConnection()->executeQuery($sql, $params);
+        return $this->createResultSet($stmt);
+    }
+
+    /**
+     * コールバック関数をトランザクションの中で実行します
+     *
+     * 関数の開始時にトランザクションが開始され、関数の完了時にコミットされます
+     * 関数の内部で例外が発生するとトランザクションは自動的にロールバックされます
+     *
+     * 関数の引数にはこの TableGateway のインスタンスが返します
+     *
+     * 関数の戻り値はそのままこの関数の戻り値として返ります
+     *
+     * @param callable $func トランザクションの中で実行するコールバック関数
+     *
+     * @return mixed コールバック関数が返した値
+     *
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function transactional(callable $func)
+    {
+        $conn = $this->getConnection();
+
+        $conn->beginTransaction();
+        try {
+            $ret = $func($this);
+            $conn->commit();
+            return $ret;
+        } catch (\Exception $ex) {
+            $conn->rollback();
+            throw $ex;
+        } catch (\Throwable $ex) {
+            $conn->rollback();
+            throw $ex;
+        }
+    }
+
     public function lastInsertId()
     {
         return $this->conn->lastInsertId();

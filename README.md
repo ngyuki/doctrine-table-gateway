@@ -228,3 +228,12 @@ $t = new TableGateway($connection, 't_user', new Metadata($connection, $cache));
 OneToMany/ManyToOne/ManyToMany のような関係でどのようにテーブルを走査すればいいかは機械的に判断できるものではないと思うので。
 
 どうしてもやりたければ `scope()` にクロージャーを渡してクエリビルダをごちゃごちゃすればできると思います。
+
+## アンドドキュメンテッド
+
+README.md にかかれていない機能
+
+- query
+    - 指定した SQL をそのまま実行して結果セットを得る
+- transactional
+    - コールバック関数をトランザクションの中で実行する
