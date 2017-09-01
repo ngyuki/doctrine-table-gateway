@@ -1,7 +1,6 @@
 <?php
 namespace ngyuki\DoctrineTableGateway\Test;
 
-use Doctrine\DBAL\Query\QueryBuilder;
 use ngyuki\DoctrineTableGateway\TableGateway;
 use PHPUnit\Framework\TestCase;
 
@@ -54,6 +53,35 @@ class ResultSetTest extends TestCase
             $arr[] = $key;
         }
         assertThat($arr, equalTo([0, 1]));
+    }
+
+    /**
+     * @test
+     */
+    public function as_group()
+    {
+        $t = $this->getTableGateway();
+
+        $res = $t->all()->asGroup(['aa', 'id'], ['bb', 'name']);
+
+        assertThat($res[0][1], equalTo([0, 'id1']));
+        assertThat($res[1][7], equalTo([1, 'id7']));
+
+        $res = $t->all()->asGroup([2, 0], [3, 1]);
+
+        assertThat($res[0][1], equalTo([0, 'id1']));
+        assertThat($res[1][7], equalTo([1, 'id7']));
+
+        $res = $t->all()->asGroup(['aa', 'id'], 'name');
+
+        assertThat($res[0][1], equalTo('id1'));
+        assertThat($res[1][7], equalTo('id7'));
+
+        $res = $t->all()->asGroup(['aa', 'id'], 1);
+
+        assertThat($res[0][1], equalTo('id1'));
+        assertThat($res[1][7], equalTo('id7'));
+
     }
 
     /**
