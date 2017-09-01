@@ -15,6 +15,48 @@ class ResultSetTest extends TestCase
     /**
      * @test
      */
+    public function as_column()
+    {
+        $t = $this->getTableGateway();
+
+        $res = $t->scope('bb = 0')->all()->asColumn('name')->toArray();
+        assertThat($res, equalTo([
+            'id1',
+            'id2',
+            'id5',
+            'id6',
+        ]));
+
+        $res = $t->scope('bb = 0')->all()->asColumn(['name'])->toArray();
+        assertThat($res, equalTo([
+            ['id1'],
+            ['id2'],
+            ['id5'],
+            ['id6'],
+        ]));
+
+
+        $res = $t->scope('bb = 0')->all()->asColumn(1)->toArray();
+        assertThat($res, equalTo([
+            'id1',
+            'id2',
+            'id5',
+            'id6',
+        ]));
+
+
+        $res = $t->scope('bb = 0')->all()->asColumn([1])->toArray();
+        assertThat($res, equalTo([
+            ['id1'],
+            ['id2'],
+            ['id5'],
+            ['id6'],
+        ]));
+    }
+
+    /**
+     * @test
+     */
     public function as_pair()
     {
         $t = $this->getTableGateway();

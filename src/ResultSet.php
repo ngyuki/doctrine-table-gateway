@@ -4,15 +4,46 @@ namespace ngyuki\DoctrineTableGateway;
 class ResultSet extends ResultIterator
 {
     /**
-     * @param string $column
+     * 指定した列値だけを列挙するイテレーターを返します
+     *
+     * $column に整数を指定すると列番号を指定できます
+     * $column に文字列を指定すると列名を指定できます
+     * $column に配列を指定すると結果も配列を列挙するイテレーターになります
+     *
+     * {code}
+     *      $t->all->asColumn();                // [1, 2]
+     *      $t->all->asColumn('name');          // ['foo', 'bar']
+     *      $t->all->asColumn(['id', 'name']);  // [[1, 'foo'], [2, 'bar']]
+     *      $t->all->asColumn(0, 1]);           // [[1, 'foo'], [2, 'bar']]
+     * {/code}
+     *
+     * @param int|string|array $column
      *
      * @return ResultIterator
      */
-    public function asColumn($column)
+    public function asColumn($column = 0)
     {
         return new ResultIterator((function () use ($column) {
-            foreach ($this as $key => $arr) {
-                yield $key => $arr[$column];
+            $map = null;
+            foreach ($this as $key => $row) {
+                $val = [];
+                foreach ((array)$column as $col) {
+                    if (is_int($col)) {
+                        if ($map === null) {
+                            $map = [];
+                            foreach ($row as $k => $_) {
+                                $map[] = $k;
+                            }
+                        }
+                        $col = $map[$col];
+                    }
+                    if (is_array($column)) {
+                        $val[] = $row[$col];
+                    } else {
+                        $val = $row[$col];
+                    }
+                }
+                yield $key => $val;
             }
         })());
     }
@@ -37,14 +68,14 @@ class ResultSet extends ResultIterator
     }
 
     /**
-     * @param string $key
-     * @param string $val
+     * @param string           $key
+     * @param int|string|array $column
      *
      * @return ResultIterator
      */
-    public function asPair($key, $val)
+    public function asPair($key, $column)
     {
-        return $this->asUnique($key)->asColumn($val);
+        return $this->asUnique($key)->asColumn($column);
     }
 
     /**
