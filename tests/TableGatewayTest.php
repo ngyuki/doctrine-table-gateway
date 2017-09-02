@@ -97,12 +97,12 @@ class TableGatewayTest extends TestCase
         $t = $this->getTableGateway();
 
         $res = $t
-            ->scope('aa = 1')
+            ->orderBy('aa', 'DESC')
             ->orderBy('id', 'ASC')
             ->orderBy('id', 'DESC')
             ->all()->asColumn('id')->toArray();
 
-        assertThat($res, equalTo([8, 7, 6, 5]));
+        assertThat($res, equalTo([5, 6, 7, 8, 1, 2, 3, 4]));
     }
 
     /**

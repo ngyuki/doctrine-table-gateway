@@ -196,7 +196,7 @@ class TableGateway
     public function orderBy($sort, $order = null)
     {
         return $this->scope(function (QueryBuilder $q) use ($sort, $order) {
-            $q->orderBy($sort, $order);
+            $q->addOrderBy($sort, $order);
             return $q;
         });
     }
