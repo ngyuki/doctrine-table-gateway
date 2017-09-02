@@ -43,7 +43,23 @@ class ExprTest extends TestCase
     /**
      * @test
      */
-    function scope_into()
+    function into()
+    {
+        $t = $this->getTableGateway();
+
+        $t = $t->scope([
+            'name = ?' => $t->expr()->into('id5'),
+        ]);
+
+        $res = $t->all()->current();
+
+        assertThat($res['id'], equalTo(5));
+    }
+
+    /**
+     * @test
+     */
+    function quoteInto_()
     {
         $t = $this->getTableGateway();
 
@@ -54,6 +70,20 @@ class ExprTest extends TestCase
         $res = $t->all()->current();
 
         assertThat($res['id'], equalTo(5));
+    }
+
+    /**
+     * @test
+     */
+    function likeTo()
+    {
+        $t = $this->getTableGateway();
+
+        $t = $t->scope([
+            'name' => $t->expr()->likeTo('d5'),
+        ]);
+
+        assertCount(1, $t->all()->toArray());
     }
 
     /**

@@ -10,18 +10,31 @@ trait ExpressionBuilderTrait
      */
     abstract public function getConnection();
 
+    /**
+     * @param string $type
+     * @param array ...$args
+     *
+     * @return string|null
+     */
     private function combine($type, ...$args)
     {
         $parts = [];
 
         foreach ((array)$args as $arr) {
             foreach ((array)$arr as $key => $val) {
-                if (is_int($key)) {
-                    if ($val !== null) {
-                        $parts[] = $val;
+                if ($val instanceof Constraint) {
+                    if (is_int($key)) {
+                        throw new \LogicException("constraint expression must be string array index");
                     }
+                    $parts[] = $val->apply($key);
                 } else {
-                    $parts[] = $this->equals($key, $val);
+                    if (is_int($key)) {
+                        if ($val !== null) {
+                            $parts[] = $val;
+                        }
+                    } else {
+                        $parts[] = $this->eq($key, $val);
+                    }
                 }
             }
         }
@@ -43,7 +56,7 @@ trait ExpressionBuilderTrait
     }
 
     /**
-     * @param string|int|float|bool|Expr|null $value
+     * @param string|int|float|bool|array|Expr|null $value
      * @return string
      */
     public function quote($value)
@@ -51,11 +64,11 @@ trait ExpressionBuilderTrait
         if ($value === null) {
             return 'NULL';
         }
-        if (is_bool($value)) {
-            return (string)$this->getConnection()->getDatabasePlatform()->convertBooleansToDatabaseValue($value);
-        }
         if ($value instanceof Expr) {
             return (string)$value;
+        }
+        if (is_bool($value)) {
+            return (string)$this->getConnection()->getDatabasePlatform()->convertBooleansToDatabaseValue($value);
         }
         if (is_int($value)) {
             return (string)$value;
@@ -63,29 +76,56 @@ trait ExpressionBuilderTrait
         if (is_float($value)) {
             return (string)$value;
         }
+        if (is_array($value)) {
+            if (count($value) === 0) {
+                return "(NULL)";
+            } else {
+                $value = array_map(
+                    function ($val) {
+                        return $this->quote($val);
+                    },
+                    $value
+                );
+                return "($value)";
+            }
+        }
         return $this->getConnection()->quote($value);
     }
 
-    public function equals($name, $value)
+    public function escapeLike($value)
+    {
+        return strtr($value, ['%' => '\\%', '_' => '\\_']);
+    }
+
+    private function eq($name, $value)
     {
         $name = $this->getConnection()->quoteIdentifier($name);
+        $op = '=';
 
         if (is_null($value)) {
-            return "$name IS NULL";
+            $op = 'IS';
         }
-
         if (is_array($value)) {
-            if (count($value) === 0) {
-                return "$name IN (NULL)";
-            }
-            $value = array_map(function ($val) { return $this->quote($val); }, $value);
-            return "$name IN ($value)";
+            $op = 'IN';
         }
 
         $value = $this->quote($value);
-        return "$name = $value";
+        return "$name $op $value";
     }
 
+    /**
+     * quoteInto
+     *
+     * {code}
+     *      $t = $t->scope([
+     *          $t->expr()->quoteInto('name = ?', $value),
+     *      ]);
+     * {/code}
+     *
+     * @param string $expr
+     * @param mixed  $value
+     * @return string
+     */
     public function quoteInto($expr, $value)
     {
         $index = 0;
@@ -100,18 +140,134 @@ trait ExpressionBuilderTrait
         }, $expr);
     }
 
+    /**
+     * into
+     *
+     * {code}
+     *      $t = $t->scope([
+     *          'name = ?' => $t->expr()->into($value),
+     *      ]);
+     * {/code}
+     *
+     * @param $value
+     * @return Constraint
+     */
+    public function into($value)
+    {
+        return new Constraint(function ($expr) use ($value) {
+            return $this->quoteInto($expr, $value);
+        });
+    }
+
+    public function like($name, $value, $cmp = 0)
+    {
+        $name = $this->getConnection()->quoteIdentifier($name);
+        $value = $this->escapeLike($value);
+        if ($cmp == 0) {
+            $value = "%$value%";
+        } elseif ($cmp == -1) {
+            $value = "%$value";
+        } else {
+            $value = "$value%";
+        }
+        $value = $this->quote($value);
+        return "$name LIKE $value";
+    }
+
+    public function equalTo($value)
+    {
+        return new Constraint(function ($expr) use ($value) {
+            return $this->eq($expr, $value);
+        });
+    }
+
+    /**
+     * @param $value
+     * @return Constraint
+     */
+    public function likeTo($value)
+    {
+        return new Constraint(function ($expr) use ($value) {
+            return $this->like($expr, $value);
+        });
+    }
+
+    /**
+     * @param $value
+     * @return Constraint
+     */
+    public function likeToL($value)
+    {
+        return new Constraint(function ($expr) use ($value) {
+            return $this->like($expr, $value, 1);
+        });
+    }
+
+    /**
+     * @param $value
+     * @return Constraint
+     */
+    public function likeToR($value)
+    {
+        return new Constraint(function ($expr) use ($value) {
+            return $this->like($expr, $value, -1);
+        });
+    }
+
+    /**
+     * expr
+     *
+     * {code}
+     *      $t = $t->scope([
+     *          'date' => $t->expr('CURRENT_DATE'),
+     *      ]);
+     * {/code}
+     *
+     * @param string $expr
+     * @return Expr
+     */
     public function expr($expr)
     {
         return new Expr($expr);
     }
 
-    public function andX(...$args)
+    /**
+     * AND
+     *
+     * {code}
+     *      $t = $t->scope([
+     *          $t->expr()->andX([
+     *              'id' => 1,
+     *              'no' => 2,
+     *          ]),
+     *      ]);
+     * {/code}
+     *
+     * @param array|string $args
+     * @return string|null
+     */
+    public function andX($args)
     {
-        return $this->combine('AND', ...$args);
+        return $this->combine('AND', ...func_get_args());
     }
 
-    public function orX(...$args)
+    /**
+     * OR
+     *
+     * {code}
+     *      $t = $t->scope([
+     *          $t->expr()->orX([
+     *              'id' => 1,
+     *              'no' => 2,
+     *          ]),
+     *      ]);
+     * {/code}
+     *
+     * @param array|string $args
+     * @return string|null
+     */
+    public function orX($args)
     {
-        return $this->combine('OR', ...$args);
+        return $this->combine('OR', ...func_get_args());
     }
 }
