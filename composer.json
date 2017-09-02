@@ -25,5 +25,10 @@
         "psr-4": {
             "ngyuki\\DoctrineTableGateway\\": "src/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ngyuki\\DoctrineTableGateway\\Test\\": "tests/"
+        }
     }
 }

@@ -1,8 +1,6 @@
 <?php
 namespace ngyuki\DoctrineTableGateway\Example;
 
-require __DIR__ . '/../tests/bootstrap.php';
-
 function h($msg)
 {
     echo "\n=== $msg\n";
