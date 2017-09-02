@@ -43,6 +43,41 @@ class ExprTest extends TestCase
     /**
      * @test
      */
+    function scope_into()
+    {
+        $t = $this->getTableGateway();
+
+        $t = $t->scope([
+            $t->expr()->quoteInto('name = ?', 'id5')
+        ]);
+
+        $res = $t->all()->current();
+
+        assertThat($res['id'], equalTo(5));
+    }
+
+    /**
+     * @test
+     */
+    function scope_or()
+    {
+        $t = $this->getTableGateway();
+
+        $t = $t->scope([
+            $t->expr()->orX(
+                ['id' => 5],
+                ['id' => 6]
+            ),
+        ]);
+
+        $res = $t->all()->asColumn('id')->toArray();
+
+        assertThat($res, equalTo([5, 6]));
+    }
+
+    /**
+     * @test
+     */
     function insert_expr()
     {
         $t = $this->getTableGateway();

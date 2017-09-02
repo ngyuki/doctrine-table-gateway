@@ -1,5 +1,5 @@
 <?php
-namespace ngyuki\DoctrineTableGateway;
+namespace ngyuki\DoctrineTableGateway\Query;
 
 class Expr
 {

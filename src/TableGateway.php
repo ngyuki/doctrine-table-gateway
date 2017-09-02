@@ -4,6 +4,8 @@ namespace ngyuki\DoctrineTableGateway;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\ResultStatement;
 use Doctrine\DBAL\Query\QueryBuilder;
+use ngyuki\DoctrineTableGateway\Query\Expr;
+use ngyuki\DoctrineTableGateway\Query\ExpressionBuilder;
 
 class TableGateway
 {
@@ -11,6 +13,11 @@ class TableGateway
      * @var Connection
      */
     protected $conn;
+
+    /**
+     * @var ExpressionBuilder
+     */
+    protected $expr;
 
     /**
      * @var string
@@ -40,6 +47,7 @@ class TableGateway
     public function __construct(Connection $conn, $table, Metadata $metadata = null)
     {
         $this->conn = $conn;
+        $this->expr = new ExpressionBuilder($conn);
         $this->table = $table;
         $this->metadata = $metadata ?: new Metadata($conn);
     }
@@ -52,6 +60,20 @@ class TableGateway
     public function getTable()
     {
         return $this->table;
+    }
+
+    /**
+     * ExpressionBuilder を返す
+     *
+     * @param string|null $expr
+     * @return Expr|ExpressionBuilder
+     */
+    public function expr($expr = null)
+    {
+        if ($expr === null) {
+            return $this->expr;
+        }
+        return $this->expr->expr($expr);
     }
 
     /**
@@ -116,22 +138,9 @@ class TableGateway
         }
 
         if ($scope instanceof \Closure === false) {
-            $list = (array)$scope;
-            $scope = function (QueryBuilder $q) use ($list) {
-                foreach ($list as $key => $scope) {
-                    if (is_string($key)) {
-                        $q->andWhere(
-                            $q->expr()->eq(
-                                $this->conn->quoteIdentifier($key),
-                                $this->quoteValue($scope)
-                            )
-                        );
-                    } elseif (is_string($scope)) {
-                        $q->andWhere($scope);
-                    } else {
-                        throw new \LogicException("invalid scope type");
-                    }
-                }
+            $where = $this->expr->andX($scope);
+            $scope = function (QueryBuilder $q) use ($where) {
+                $q->where($where);
             };
         }
 
@@ -314,26 +323,6 @@ class TableGateway
         return $this->conn->lastInsertId();
     }
 
-    private function quoteValue($val)
-    {
-        if ($val === null) {
-            return 'NULL';
-        }
-        if (is_object($val) && $val instanceof Expr) {
-            return $val;
-        }
-        if (is_bool($val)) {
-            return var_export($val, true);
-        }
-        if (is_float($val)) {
-            return $val;
-        }
-        if (is_int($val)) {
-            return $val;
-        }
-        return $this->conn->quote($val);
-    }
-
     private function quotes(array $data)
     {
         $data = $data + $this->values;
@@ -342,14 +331,9 @@ class TableGateway
         $data = array_intersect_key($data, array_flip($columns));
         $ret = [];
         foreach ($data as $key => $val) {
-            $ret[$this->conn->quoteIdentifier($key)] = $this->quoteValue($val);
+            $ret[$this->conn->quoteIdentifier($key)] = $this->expr->quote($val);
         }
         return $ret;
-    }
-
-    public function expr($expr)
-    {
-        return new Expr($expr);
     }
 
     public function insert(array $data)
