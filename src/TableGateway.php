@@ -191,6 +191,18 @@ class TableGateway
     }
 
     /**
+     * @param int $limit
+     *
+     * @return static
+     */
+    public function limit($limit)
+    {
+        return $this->scope(function (QueryBuilder $q) use ($limit) {
+            return $q->setMaxResults($limit);
+        });
+    }
+
+    /**
      * 主キーでスコープを適用する
      *
      * @param mixed $id プライマリキーの値、複合主キーなら配列で指定する

@@ -92,6 +92,18 @@ class TableGatewayTest extends TestCase
     /**
      * @test
      */
+    public function limit()
+    {
+        $t = $this->getTableGateway();
+
+        $res = $t->orderBy('id', 'DESC')->limit(2)->all()->asColumn('id')->toArray();
+
+        assertThat($res, equalTo([8, 7]));
+    }
+
+    /**
+     * @test
+     */
     public function select()
     {
         $t = $this->getTableGateway();
