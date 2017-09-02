@@ -7,6 +7,22 @@ use PHPUnit\Framework\TestCase;
 
 class TableGatewayTest extends TestCase
 {
+    public static function setUpBeforeClass()
+    {
+        $conn = ConnectionManager::getConnection();
+        $t = new TableGateway($conn, 't_user');
+        $t->delete();
+        $cols = ['id', 'name', 'aa', 'bb', 'cc'];
+        $t->insert(array_combine($cols, [1, 'id1', 0, 0, 0]));
+        $t->insert(array_combine($cols, [2, 'id2', 0, 0, 1]));
+        $t->insert(array_combine($cols, [3, 'id3', 0, 1, 0]));
+        $t->insert(array_combine($cols, [4, 'id4', 0, 1, 1]));
+        $t->insert(array_combine($cols, [5, 'id5', 1, 0, 0]));
+        $t->insert(array_combine($cols, [6, 'id6', 1, 0, 1]));
+        $t->insert(array_combine($cols, [7, 'id7', 1, 1, 0]));
+        $t->insert(array_combine($cols, [8, 'id8', 1, 1, 1]));
+    }
+
     private function getTableGateway()
     {
         $conn = ConnectionManager::getConnection();
@@ -36,11 +52,11 @@ class TableGatewayTest extends TestCase
     public function scope()
     {
         $t = $this->getTableGateway();
-        
+
         $res = $t->scope('aa = 1')->scope('bb = 0')->all()->asColumn('id')->toArray();
         assertThat($res, equalTo([5, 6]));
 
-        $res = $t->scope('aa = 1')->scope(function (QueryBuilder $q) { $q->orderBy('id', 'DESC'); })->all()->asColumn('id')->toArray();
+        $res = $t->scope('aa = 1')->orderBy('id', 'DESC')->all()->asColumn('id')->toArray();
         assertThat($res, equalTo([8, 7, 6, 5]));
     }
 
@@ -136,14 +152,14 @@ class TableGatewayTest extends TestCase
     function query()
     {
         $t = $this->getTableGateway();
-        $name = $t->query('select name from t_user where id = 4')->asColumn('name')->current();
+        $name = $t->query('/**/ select name from t_user where id = 4')->asColumn('name')->current();
         assertEquals('id4', $name);
     }
 
     /**
      * @test
      */
-    function t()
+    function transactional()
     {
         $t = $this->getTableGateway();
 

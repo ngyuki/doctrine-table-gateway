@@ -6,6 +6,17 @@ use PHPUnit\Framework\TestCase;
 
 class ExprTest extends TestCase
 {
+    public static function setUpBeforeClass()
+    {
+        $conn = ConnectionManager::getConnection();
+        $t = new TableGateway($conn, 't_user');
+        $t->delete();
+        $cols = ['id', 'name'];
+        $t->insert(array_combine($cols, [1, 'xxx']));
+        $t->insert(array_combine($cols, [100, 'abc']));
+        $t->insert(array_combine($cols, [101, 'xxx']));
+    }
+
     protected function setUp()
     {
         $conn = ConnectionManager::getConnection();
@@ -27,17 +38,17 @@ class ExprTest extends TestCase
     /**
      * @test
      */
-    function scope_expr()
+    function expr()
     {
         $t = $this->getTableGateway();
 
         $t = $t->scope([
-            'name' => $t->expr("concat('id', 5)")
+            'name' => $t->expr("concat('a', 'b', 'c')")
         ]);
 
         $res = $t->all()->current();
 
-        assertThat($res['id'], equalTo(5));
+        assertThat($res['id'], equalTo(100));
     }
 
     /**
@@ -48,12 +59,12 @@ class ExprTest extends TestCase
         $t = $this->getTableGateway();
 
         $t = $t->scope([
-            'name = ?' => $t->expr()->into('id5'),
+            'name = ?' => $t->expr()->into('abc'),
         ]);
 
         $res = $t->all()->current();
 
-        assertThat($res['id'], equalTo(5));
+        assertThat($res['id'], equalTo(100));
     }
 
     /**
@@ -62,14 +73,18 @@ class ExprTest extends TestCase
     function quoteInto_()
     {
         $t = $this->getTableGateway();
-
         $t = $t->scope([
-            $t->expr()->quoteInto('name = ?', 'id5')
+            $t->expr()->quoteInto('name = ?', 'abc')
         ]);
 
-        $res = $t->all()->current();
+        assertThat($t->all()->current()['id'], equalTo(100));
 
-        assertThat($res['id'], equalTo(5));
+        $t = $this->getTableGateway();
+        $t = $t->scope([
+            $t->expr()->quoteInto('name = :name', ['name' => 'abc'])
+        ]);
+
+        assertThat($t->all()->current()['id'], equalTo(100));
     }
 
     /**
@@ -78,31 +93,59 @@ class ExprTest extends TestCase
     function likeTo()
     {
         $t = $this->getTableGateway();
-
-        $t = $t->scope([
-            'name' => $t->expr()->likeTo('d5'),
+        $t = $this->getTableGateway()->scope([
+            'name' => $t->expr()->likeTo('b'),
         ]);
+        assertThat($t->all()->asColumn()->current(), equalTo(100));
 
-        assertCount(1, $t->all()->toArray());
+        $t = $this->getTableGateway();
+        $t = $this->getTableGateway()->scope([
+            'name' => $t->expr()->likeTo('d'),
+        ]);
+        assertThat($t->all()->current(), isNull());
+
+        $t = $this->getTableGateway();
+        $t = $this->getTableGateway()->scope([
+            'name' => $t->expr()->likeToL('ab'),
+        ]);
+        assertThat($t->all()->asColumn()->current(), equalTo(100));
+
+        $t = $this->getTableGateway();
+        $t = $this->getTableGateway()->scope([
+            'name' => $t->expr()->likeToL('bc'),
+        ]);
+        assertThat($t->all()->current(), isNull());
+
+        $t = $this->getTableGateway();
+        $t = $this->getTableGateway()->scope([
+            'name' => $t->expr()->likeToR('bc'),
+        ]);
+        assertThat($t->all()->asColumn()->current(), equalTo(100));
+
+        $t = $this->getTableGateway();
+        $t = $this->getTableGateway()->scope([
+            'name' => $t->expr()->likeToR('ab'),
+        ]);
+        assertThat($t->all()->current(), isNull());
     }
 
     /**
      * @test
      */
-    function scope_or()
+    function orX()
     {
         $t = $this->getTableGateway();
 
         $t = $t->scope([
             $t->expr()->orX(
-                ['id' => 5],
-                ['id' => 6]
+                ['id' => 100],
+                ['id' => 101]
             ),
         ]);
 
         $res = $t->all()->asColumn('id')->toArray();
 
-        assertThat($res, equalTo([5, 6]));
+        assertThat($res, equalTo([100, 101]));
     }
 
     /**

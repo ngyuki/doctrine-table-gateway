@@ -6,6 +6,22 @@ use PHPUnit\Framework\TestCase;
 
 class ResultSetTest extends TestCase
 {
+    public static function setUpBeforeClass()
+    {
+        $conn = ConnectionManager::getConnection();
+        $t = new TableGateway($conn, 't_user');
+        $t->delete();
+        $cols = ['id', 'name', 'aa', 'bb', 'cc'];
+        $t->insert(array_combine($cols, [1, 'id1', 0, 0, 0]));
+        $t->insert(array_combine($cols, [2, 'id2', 0, 0, 1]));
+        $t->insert(array_combine($cols, [3, 'id3', 0, 1, 0]));
+        $t->insert(array_combine($cols, [4, 'id4', 0, 1, 1]));
+        $t->insert(array_combine($cols, [5, 'id5', 1, 0, 0]));
+        $t->insert(array_combine($cols, [6, 'id6', 1, 0, 1]));
+        $t->insert(array_combine($cols, [7, 'id7', 1, 1, 0]));
+        $t->insert(array_combine($cols, [8, 'id8', 1, 1, 1]));
+    }
+
     private function getTableGateway()
     {
         $conn = ConnectionManager::getConnection();
@@ -124,6 +140,10 @@ class ResultSetTest extends TestCase
         assertThat($res[0][1], equalTo('id1'));
         assertThat($res[1][7], equalTo('id7'));
 
+        $res = $t->all()->asGroup(['aa', 'id'], null);
+
+        assertThat($res[0][1]['name'], equalTo('id1'));
+        assertThat($res[1][7]['name'], equalTo('id7'));
     }
 
     /**
