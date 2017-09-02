@@ -103,6 +103,8 @@ class TableGateway
      */
     protected function setScope($scope, array $values = null)
     {
+        // $values が未指定なら $scope で key => value なやつだけ $values に使う
+        // @todo $scope には insert に使えない値が入ることあるかも・・ scala/expr だけに限定？
         if ($values === null) {
             if (is_array($scope)) {
                 foreach ($scope as $key => $val) {
