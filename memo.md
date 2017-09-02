@@ -19,19 +19,6 @@ doctrine-dbal はライブラリ側でその手のバインドは行われず、
 
 ZF はクオートして埋め込まれる？ コードを見た感じ名前付きになることもある？ 順序になることはない？
 
-## into とか
-
-TableGateway にショートハンド用のメソッドを生やす。
-
-```php
-$t->scope([
-    'name = ?' => $t->into($name),
-    'name like ?' => $t->like($name),       // name like %{$name}%
-    'name like ?' => $t->likeLeft($name),   // name like %{$name}
-    'name like ?' => $t->likeRight($name),  // name like {$name}%
-]);
-```
-
 ## join とか
 
 ```php
@@ -45,28 +32,26 @@ join とか必要なら SQL を直で書けば良い気がする。
 
 ## query
 
-SQL を直で書きたいときに使うメソッド。
+SQL を直で書きたいときに使う。
 
-スコープとして扱うか ResultSet を返すか。
+「生SQLスコープ」みたいにしようかと思ったけど、その後できることは `all()` しか無いので直接 ResultSet を返すことにした。
 
 ```php
-// スコープ
+// スコープとなるならこうだけど all() しかやることがない
 $t->query($sql)->all()->current();
 
-// ResultSet を返す
+// 直接 ResultSet を返すほうが自然
 $t->query($sql)->current();
 ```
 
-スコープとして扱ってもその次にできることは `all()` しか無いので直接 ResultSet を返すことにする。
+## asUnique/asGroup
 
-## asUnique
+asUnique の引数で配列を指定すると多次元配列を返すようにしようと思ったが、それだと型情報が死ぬ。
 
-asUnique で引数の配列を指定することで多次元配列を返せるようにしようと思ったけど・・イテレーターだと簡単ではない。。
-
-そもそも型指定が死んでしまうし、多次元配列を返す別のバージョンを作るか。
+なので多次元配列を返す別バージョンを作成した。
 
 ```php
-asGroup($keys, $vals)
+$results->asGroup($keys, $vals)
 ```
 
 ## all の戻り値
