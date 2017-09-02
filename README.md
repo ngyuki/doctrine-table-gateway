@@ -81,11 +81,32 @@ $t->scope(function (\Doctrine\DBAL\Query\QueryBuilder $q) {
 // 指定された列値のみのイテレーターを返す
 $t->all()->asColumn('col');
 
+// 列番号でも指定可能
+$t->all()->asColumn(3);
+
+// 引数を省略すると 0 と同じ
+$t->all()->asColumn();
+
+// 配列なら指定した列値の配列が返る
+$t->all()->asColumn(['col1', 'col2']);
+
 // 指定された列値がキー値となるイテレーターを返す
 $t->all()->asUnique('col');
 
 // 指定された 2 つの列値がキーと値となるイテレーターを返す
 $t->all()->asPair('key', 'val');
+
+// 値の方は asColumn と同じように指定できる
+$t->all()->asPair('key', ['col1', 'col2']);
+
+// 複数の列値で多次元連想配列を返す ... `$array[$key1][$key2][$key2] = $val `のような連想配列が返る
+$t->all()->asGroup(['key1', 'key2', 'key2'], 'val');
+
+// 値の方は asColumn と同じように指定できる
+$t->all()->asGroup(['key1', 'key2', 'key2'], ['col1', 'col2']);
+
+// 値を NULL にすると行がそのまま返る
+$t->all()->asGroup(['key1', 'key2', 'key2'], null);
 
 // イテレーターを配列化する
 $t->all()->toArray();
@@ -93,31 +114,47 @@ $t->all()->toArray();
 
 例えば次のようなテーブルがあるとき、
 
-| id  | name
-| --- | ---
-| 1   | aaa
-| 2   | bbb
-| 3   | ccc
+| id  | name | age
+| --- | ---  | ---
+| 1   | aaa  | 16
+| 2   | bbb  | 24
+| 3   | ccc  | 32
 
 それぞれ次のように返ります。
 
 ```php
-$t->all()->asColumn('id')->toArray();
-//=> [1, 2, 3]
+$t->all()->asColumn('name')->toArray();
+//  [aaa, bbb, ccc]
+
+$t->all()->asColumn([0, 2])->toArray();
+//  [[1, 16], [2, 24], [3, 32]]
 
 $t->all()->asUnique('id')->toArray();
-//=> [
-//=>   1 => ['id' => 1, 'name' => 'aaa'],
-//=>   2 => ['id' => 2, 'name' => 'bbb'],
-//=>   3 => ['id' => 3, 'name' => 'ccc'],
-//=> ]
+//  [
+//      1 => [id => 1, name => aaa, age => 16],
+//      2 => [id => 2, name => bbb, age => 24],
+//      3 => [id => 3, name => ccc, age => 32],
+//  ]
 
 $t->all()->asPair('id', 'name');
-//=> [
-//=>   1 => 'aaa',
-//=>   2 => 'bbb',
-//=>   3 => 'ccc',
-//=> ]
+//  [
+//      1 => aaa,
+//      2 => bbb,
+//      3 => ccc,
+//  ]
+
+$t->all()->asGroup(['id', 'age'], 'name');
+//  [
+//      1 => [
+//          16 => aaa
+//      ],
+//      2 => [
+//          24 => bbb,
+//      ],
+//      3 => [
+//          32 => ccc,
+//      ],
+//  ]
 ```
 
 ## INSERT
@@ -237,7 +274,5 @@ README.md にかかれていない機能
     - 指定した SQL をそのまま実行して結果セットを得る
 - transactional
     - コールバック関数をトランザクションの中で実行する
-- asGroup
-    - 結果を多次元の連想配列で得る
-- asColumn
-    - 整数や配列を指定できるようにした
+- ExpressionBuilder
+    - scope の表現が少し豊かになった
