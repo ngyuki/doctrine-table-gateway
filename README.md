@@ -81,12 +81,6 @@ $t->scope(function (\Doctrine\DBAL\Query\QueryBuilder $q) {
 // 指定された列値のみのイテレーターを返す
 $t->all()->asColumn('col');
 
-// 列番号でも指定可能
-$t->all()->asColumn(3);
-
-// 引数を省略すると 0 と同じ
-$t->all()->asColumn();
-
 // 配列なら指定した列値の配列が返る
 $t->all()->asColumn(['col1', 'col2']);
 
@@ -126,7 +120,7 @@ $t->all()->toArray();
 $t->all()->asColumn('name')->toArray();
 //  [aaa, bbb, ccc]
 
-$t->all()->asColumn([0, 2])->toArray();
+$t->all()->asColumn(['id', 'age'])->toArray();
 //  [[1, 16], [2, 24], [3, 32]]
 
 $t->all()->asUnique('id')->toArray();

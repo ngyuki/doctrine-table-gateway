@@ -50,24 +50,6 @@ class ResultSetTest extends TestCase
             ['id5'],
             ['id6'],
         ]));
-
-
-        $res = $t->scope('bb = 0')->all()->asColumn(1)->toArray();
-        assertThat($res, equalTo([
-            'id1',
-            'id2',
-            'id5',
-            'id6',
-        ]));
-
-
-        $res = $t->scope('bb = 0')->all()->asColumn([1])->toArray();
-        assertThat($res, equalTo([
-            ['id1'],
-            ['id2'],
-            ['id5'],
-            ['id6'],
-        ]));
     }
 
     /**
@@ -125,17 +107,7 @@ class ResultSetTest extends TestCase
         assertThat($res[0][1], equalTo([0, 'id1']));
         assertThat($res[1][7], equalTo([1, 'id7']));
 
-        $res = $t->all()->asGroup([2, 0], [3, 1]);
-
-        assertThat($res[0][1], equalTo([0, 'id1']));
-        assertThat($res[1][7], equalTo([1, 'id7']));
-
         $res = $t->all()->asGroup(['aa', 'id'], 'name');
-
-        assertThat($res[0][1], equalTo('id1'));
-        assertThat($res[1][7], equalTo('id7'));
-
-        $res = $t->all()->asGroup(['aa', 'id'], 1);
 
         assertThat($res[0][1], equalTo('id1'));
         assertThat($res[1][7], equalTo('id7'));

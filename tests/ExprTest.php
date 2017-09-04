@@ -59,7 +59,7 @@ class ExprTest extends TestCase
         $t = $this->getTableGateway();
         $t = $t->scope([]);
 
-        $res = $t->all()->asColumn()->toArray();
+        $res = $t->all()->asColumn('id')->toArray();
 
         assertThat($res, equalTo([1, 100, 101]));
     }
@@ -74,7 +74,7 @@ class ExprTest extends TestCase
             'id' => [100, 101],
         ]);
 
-        $res = $t->all()->asColumn()->toArray();
+        $res = $t->all()->asColumn('id')->toArray();
 
         assertThat($res, equalTo([100, 101]));
     }
@@ -89,7 +89,7 @@ class ExprTest extends TestCase
             'id' => [],
         ]);
 
-        $res = $t->all()->asColumn()->toArray();
+        $res = $t->all()->asColumn('id')->toArray();
 
         assertThat($res, equalTo([]));
     }
@@ -104,7 +104,7 @@ class ExprTest extends TestCase
             'id' => 1.0,
         ]);
 
-        $res = $t->all()->asColumn()->toArray();
+        $res = $t->all()->asColumn('id')->toArray();
 
         assertThat($res, equalTo([1]));
     }
@@ -119,7 +119,7 @@ class ExprTest extends TestCase
             'aa' => null,
         ]);
 
-        $res = $t->all()->asColumn()->toArray();
+        $res = $t->all()->asColumn('id')->toArray();
 
         assertThat($res, equalTo([1]));
     }
@@ -185,7 +185,7 @@ class ExprTest extends TestCase
         $t = $this->getTableGateway()->scope([
             'name' => $t->expr()->likeTo('b'),
         ]);
-        assertThat($t->all()->asColumn()->current(), equalTo(100));
+        assertThat($t->all()->asColumn('id')->current(), equalTo(100));
 
         $t = $this->getTableGateway();
         $t = $this->getTableGateway()->scope([
@@ -197,7 +197,7 @@ class ExprTest extends TestCase
         $t = $this->getTableGateway()->scope([
             'name' => $t->expr()->likeToL('ab'),
         ]);
-        assertThat($t->all()->asColumn()->current(), equalTo(100));
+        assertThat($t->all()->asColumn('id')->current(), equalTo(100));
 
         $t = $this->getTableGateway();
         $t = $this->getTableGateway()->scope([
@@ -209,7 +209,7 @@ class ExprTest extends TestCase
         $t = $this->getTableGateway()->scope([
             'name' => $t->expr()->likeToR('bc'),
         ]);
-        assertThat($t->all()->asColumn()->current(), equalTo(100));
+        assertThat($t->all()->asColumn('id')->current(), equalTo(100));
 
         $t = $this->getTableGateway();
         $t = $this->getTableGateway()->scope([

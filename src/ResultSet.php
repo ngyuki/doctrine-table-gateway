@@ -6,37 +6,25 @@ class ResultSet extends ResultIterator
     /**
      * 指定した列値だけを列挙するイテレーターを返します
      *
-     * $column に整数を指定すると列番号を指定できます
      * $column に文字列を指定すると列名を指定できます
      * $column に配列を指定すると結果も配列を列挙するイテレーターになります
      *
      * {code}
-     *      $t->all->asColumn();                // [1, 2]
      *      $t->all->asColumn('name');          // ['foo', 'bar']
      *      $t->all->asColumn(['id', 'name']);  // [[1, 'foo'], [2, 'bar']]
-     *      $t->all->asColumn(0, 1]);           // [[1, 'foo'], [2, 'bar']]
      * {/code}
      *
-     * @param int|string|array $column
+     * @param string|string[] $column
      *
      * @return ResultIterator
      */
-    public function asColumn($column = 0)
+    public function asColumn($column)
     {
         return new ResultIterator((function () use ($column) {
             $map = null;
             foreach ($this as $key => $row) {
                 $val = [];
                 foreach ((array)$column as $col) {
-                    if (is_int($col)) {
-                        if ($map === null) {
-                            $map = [];
-                            foreach ($row as $k => $_) {
-                                $map[] = $k;
-                            }
-                        }
-                        $col = $map[$col];
-                    }
                     if (is_array($column)) {
                         $val[] = $row[$col];
                     } else {
@@ -96,22 +84,10 @@ class ResultSet extends ResultIterator
     public function asGroup($key, $column = null)
     {
         $ret = [];
-        $map = null;
         foreach ($this as $row) {
-
-            if ($map === null) {
-                $map = [];
-                foreach ($row as $k => $_) {
-                    $map[] = $k;
-                }
-            }
-
             unset($ref);
             $ref =& $ret;
             foreach ((array)$key as $k) {
-                if (is_int($k)) {
-                    $k = $map[$k];
-                }
                 $ref =& $ref[$row[$k]];
             }
 
@@ -122,9 +98,6 @@ class ResultSet extends ResultIterator
                     $ref = [];
                 }
                 foreach ((array)$column as $col) {
-                    if (is_int($col)) {
-                        $col = $map[$col];
-                    }
                     if (is_array($column)) {
                         $ref[] = $row[$col];
                     } else {
