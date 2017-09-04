@@ -14,7 +14,7 @@ trait ExpressionBuilderTrait
      * @param string $type
      * @param array ...$args
      *
-     * @return string|null
+     * @return string
      */
     private function combine($type, ...$args)
     {
@@ -40,7 +40,8 @@ trait ExpressionBuilderTrait
         }
 
         if (count($parts) == 0) {
-            return null;
+            $val = $this->quote(true);
+            return "($val)";
         }
 
         if (count($parts) == 1) {
@@ -86,6 +87,7 @@ trait ExpressionBuilderTrait
                     },
                     $value
                 );
+                $value = implode(', ', $value);
                 return "($value)";
             }
         }
@@ -244,7 +246,7 @@ trait ExpressionBuilderTrait
      * {/code}
      *
      * @param array|string $args
-     * @return string|null
+     * @return string
      */
     public function andX($args)
     {
@@ -264,7 +266,7 @@ trait ExpressionBuilderTrait
      * {/code}
      *
      * @param array|string $args
-     * @return string|null
+     * @return string
      */
     public function orX($args)
     {

@@ -11,10 +11,10 @@ class ExprTest extends TestCase
         $conn = ConnectionManager::getConnection();
         $t = new TableGateway($conn, 't_user');
         $t->delete();
-        $cols = ['id', 'name'];
-        $t->insert(array_combine($cols, [1, 'xxx']));
-        $t->insert(array_combine($cols, [100, 'abc']));
-        $t->insert(array_combine($cols, [101, 'xxx']));
+        $cols = ['id', 'name', 'aa'];
+        $t->insert(array_combine($cols, [1, 'xxx', null]));
+        $t->insert(array_combine($cols, [100, 'abc', 123]));
+        $t->insert(array_combine($cols, [101, 'xxx', 132]));
     }
 
     protected function setUp()
@@ -44,6 +44,95 @@ class ExprTest extends TestCase
 
         $t = $t->scope([
             'name' => $t->expr("concat('a', 'b', 'c')")
+        ]);
+
+        $res = $t->all()->current();
+
+        assertThat($res['id'], equalTo(100));
+    }
+
+    /**
+     * @test
+     */
+    function empty_()
+    {
+        $t = $this->getTableGateway();
+        $t = $t->scope([]);
+
+        $res = $t->all()->asColumn()->toArray();
+
+        assertThat($res, equalTo([1, 100, 101]));
+    }
+
+    /**
+     * @test
+     */
+    function in_()
+    {
+        $t = $this->getTableGateway();
+        $t = $t->scope([
+            'id' => [100, 101],
+        ]);
+
+        $res = $t->all()->asColumn()->toArray();
+
+        assertThat($res, equalTo([100, 101]));
+    }
+
+    /**
+     * @test
+     */
+    function in_empty_()
+    {
+        $t = $this->getTableGateway();
+        $t = $t->scope([
+            'id' => [],
+        ]);
+
+        $res = $t->all()->asColumn()->toArray();
+
+        assertThat($res, equalTo([]));
+    }
+
+    /**
+     * @test
+     */
+    function float_()
+    {
+        $t = $this->getTableGateway();
+        $t = $t->scope([
+            'id' => 1.0,
+        ]);
+
+        $res = $t->all()->asColumn()->toArray();
+
+        assertThat($res, equalTo([1]));
+    }
+
+    /**
+     * @test
+     */
+    function is_null()
+    {
+        $t = $this->getTableGateway();
+        $t = $t->scope([
+            'aa' => null,
+        ]);
+
+        $res = $t->all()->asColumn()->toArray();
+
+        assertThat($res, equalTo([1]));
+    }
+
+    /**
+     * @test
+     */
+    function equalTo_()
+    {
+        $t = $this->getTableGateway();
+
+        $t = $t->scope([
+            'name' => $t->expr()->equalTo('abc'),
         ]);
 
         $res = $t->all()->current();
