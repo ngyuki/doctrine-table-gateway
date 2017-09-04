@@ -99,6 +99,10 @@ trait ExpressionBuilderTrait
         return strtr($value, ['%' => '\\%', '_' => '\\_']);
     }
 
+    /**
+     * @param string|int|float|bool|array|Expr|null $value
+     * @return string
+     */
     private function eq($name, $value)
     {
         $name = $this->getConnection()->quoteIdentifier($name);

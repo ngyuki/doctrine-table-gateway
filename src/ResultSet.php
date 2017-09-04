@@ -84,6 +84,7 @@ class ResultSet extends ResultIterator
     public function asGroup($key, $column = null)
     {
         $ret = [];
+        $ref = null;
         foreach ($this as $row) {
             unset($ref);
             $ref =& $ret;

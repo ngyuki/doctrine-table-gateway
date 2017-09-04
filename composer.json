@@ -30,5 +30,11 @@
         "psr-4": {
             "ngyuki\\DoctrineTableGateway\\Test\\": "tests/"
         }
+    },
+    "scripts": {
+        "qa": [
+            "phpunit",
+            "phan --color -p"
+        ]
     }
 }

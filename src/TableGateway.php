@@ -30,7 +30,7 @@ class TableGateway
     protected $metadata;
 
     /**
-     * @var TableGateway
+     * @var TableGateway|null
      */
     protected $delegate;
 
