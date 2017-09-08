@@ -241,12 +241,12 @@ class ExprTest extends TestCase
     /**
      * @test
      */
-    function orX()
+    function logicalOr_()
     {
         $t = $this->getTableGateway();
 
         $t = $t->scope([
-            $t->expr()->orX(
+            $t->expr()->logicalOr(
                 ['id' => 100],
                 ['id' => 101]
             ),

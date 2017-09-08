@@ -254,7 +254,7 @@ trait ExpressionBuilderTrait
      * @param array|string $args
      * @return string
      */
-    public function andX($args)
+    public function logicalAnd($args)
     {
         return $this->combine('AND', ...func_get_args());
     }
@@ -274,7 +274,7 @@ trait ExpressionBuilderTrait
      * @param array|string $args
      * @return string
      */
-    public function orX($args)
+    public function logicalOr($args)
     {
         return $this->combine('OR', ...func_get_args());
     }

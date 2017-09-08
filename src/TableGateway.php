@@ -138,7 +138,7 @@ class TableGateway
         }
 
         if ($scope instanceof \Closure === false) {
-            $where = $this->expr->andX($scope);
+            $where = $this->expr->logicalAnd($scope);
             $scope = function (QueryBuilder $q) use ($where) {
                 $q->where($where);
             };
