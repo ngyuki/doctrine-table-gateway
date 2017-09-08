@@ -179,6 +179,26 @@ class ExprTest extends TestCase
     /**
      * @test
      */
+    function quoteInto_obj()
+    {
+        $obj = new class {
+            public function __toString()
+            {
+                return 'abc';
+            }
+        };
+
+        $t = $this->getTableGateway();
+        $t = $t->scope([
+            $t->expr()->quoteInto('name = ?', $obj)
+        ]);
+
+        assertThat($t->all()->current()['id'], equalTo(100));
+    }
+
+    /**
+     * @test
+     */
     function likeTo()
     {
         $t = $this->getTableGateway();

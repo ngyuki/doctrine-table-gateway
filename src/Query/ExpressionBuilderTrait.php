@@ -135,7 +135,9 @@ trait ExpressionBuilderTrait
     public function quoteInto($expr, $value)
     {
         $index = 0;
-        $value = (array)$value;
+        if ((is_array($value) === false) && ($value instanceof \ArrayAccess === false)) {
+            $value = [$value];
+        }
         return preg_replace_callback('/:(\w+)|(\?)/', function ($m) use ($value, &$index) {
             list (, $name) = $m;
             if (strlen($name)) {
