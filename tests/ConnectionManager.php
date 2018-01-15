@@ -27,12 +27,12 @@ class ConnectionManager
         static $conn;
 
         if (isset($conn) === false) {
-            $conn = DriverManager::getConnection(
-                self::getConfig() + [
-                    'driver' => 'pdo_mysql',
-                    'driverOptions' => [],
-                ]
-            );
+            $config = self::getConfig() + [
+                'driver' => 'pdo_mysql',
+                'driverOptions' => [],
+            ];
+            $conn = DriverManager::getConnection($config);
+            $conn->connect();
         }
 
         return $conn;

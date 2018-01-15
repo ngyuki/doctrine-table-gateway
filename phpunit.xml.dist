@@ -10,4 +10,11 @@
             <directory suffix=".php">src/</directory>
         </whitelist>
     </filter>
+    <php>
+        <env name="MYSQL_HOST" value=""/>
+        <env name="MYSQL_PORT" value=""/>
+        <env name="MYSQL_DATABASE" value=""/>
+        <env name="MYSQL_USER" value=""/>
+        <env name="MYSQL_PASSWORD" value=""/>
+    </php>
 </phpunit>
