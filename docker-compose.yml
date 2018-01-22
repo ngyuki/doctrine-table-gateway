@@ -5,10 +5,27 @@ services:
     image: mysql
     ports:
       - $MYSQL_PORT:3306
-    environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    environment: &environment
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
       MYSQL_DATABASE: $MYSQL_DATABASE
       MYSQL_USER: $MYSQL_USER
       MYSQL_PASSWORD: $MYSQL_PASSWORD
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
     volumes:
-      - ./sql/:/docker-entrypoint-initdb.d/:ro
+      - ./sql:/docker-entrypoint-initdb.d:ro
+
+  php:
+    image: ngyuki/php-dev:7.0-alpine
+    environment:
+      <<: *environment
+    volumes:
+      - .:/project:rw
+    working_dir: /project
+    command:
+      - sh
+      - -c
+      - |
+        composer install -o --ansi --prefer-dist
+        php -v
+        tail -f /dev/null
