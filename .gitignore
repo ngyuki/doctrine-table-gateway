@@ -3,3 +3,4 @@
 /tests/config.php
 /build/
 /.envrc
+/.php_cs.cache
