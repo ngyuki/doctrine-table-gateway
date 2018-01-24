@@ -50,7 +50,9 @@ trait ExpressionBuilderTrait
             }
         }
 
-        $parts = array_map(function ($part) { return "($part)"; }, $parts);
+        $parts = array_map(function ($part) {
+            return "($part)";
+        }, $parts);
         $sql = implode(" $type ", $parts);
 
         return $sql;

@@ -81,8 +81,12 @@ class TableGatewayTest extends TestCase
         $t = $this->getTableGateway();
 
         $res = $t
-            ->scope(function (QueryBuilder $q) { $q->andWhere('aa = 0'); })
-            ->scope(function (QueryBuilder $q) { $q->orWhere('bb = 0')->orWhere('bb = 1'); })
+            ->scope(function (QueryBuilder $q) {
+                $q->andWhere('aa = 0');
+            })
+            ->scope(function (QueryBuilder $q) {
+                $q->orWhere('bb = 0')->orWhere('bb = 1');
+            })
             ->all()->toArray();
         $res = array_column($res, 'id');
 

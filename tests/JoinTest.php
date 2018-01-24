@@ -42,7 +42,7 @@ class JoinTest extends TestCase
      */
     function join()
     {
-        $t = $this->getTableGateway()->scope(['id' => 1])->scope(function (QueryBuilder $q){
+        $t = $this->getTableGateway()->scope(['id' => 1])->scope(function (QueryBuilder $q) {
             return $q->join('t_user', 't_post', 'p', 't_user.id = p.user_id');
         });
 

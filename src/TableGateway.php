@@ -228,8 +228,12 @@ class TableGateway
 
         if (count($ids) !== count($keys)) {
             throw new \InvalidArgumentException(
-                sprintf("invalid id count ... %s primary key(%s), but actual %s keys",
-                    $this->table, implode(', ', $keys), count($ids))
+                sprintf(
+                    "invalid id count ... %s primary key(%s), but actual %s keys",
+                    $this->table,
+                    implode(', ', $keys),
+                    count($ids)
+                )
             );
         }
 
